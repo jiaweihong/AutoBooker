@@ -1,0 +1,22 @@
+{
+  "name": "autobooker",
+  "version": "1.0.0",
+  "description": "book courts automatically",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/jiaweihong/AutoBooker.git"
+  },
+  "author": "Jia Wei Hong",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/jiaweihong/AutoBooker/issues"
+  },
+  "homepage": "https://github.com/jiaweihong/AutoBooker#readme",
+  "dependencies": {
+    "selenium-webdriver": "^4.3.0"
+  }
+}
