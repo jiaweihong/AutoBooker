@@ -1,10 +1,26 @@
-const {Builder} = require('selenium-webdriver');
+const {Builder, By, Key} = require('selenium-webdriver');
+const chromedriver = require('chromedriver');
+require('dotenv').config();
 
 async function main() {
     try {
-        let driver = await Builder.forBrowser("Chrome").build();
+        console.log(process.env.PASSWORD);
+        let driver = await new Builder().forBrowser("chrome").build();
     
-        await driver.get("https://legendidp.nottingham.ac.uk/idp/profile/SAML2/Redirect/SSO?execution=e1s1");
+        // opens up page
+        await driver.get("https://www.nottingham.ac.uk/sport/membership/member-login.aspx");
+
+        // press login
+        await driver.findElement(By.xpath('//*[@id="content"]/div[2]/div[2]/div/a')).click();
+        
+        // open new tab
+        let tabs = await driver.getAllWindowHandles();
+
+        // switch focus of the driver to new tab
+        await driver.switchTo().window(tabs[1]);
+
+        // input log in details
+        await driver.findElement(By.xpath('//*[@id="username"]')).sendKeys("test");
     } catch (error) {
         console.log(error);
     }

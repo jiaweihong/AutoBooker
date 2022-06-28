@@ -18,6 +18,7 @@
   "homepage": "https://github.com/jiaweihong/AutoBooker#readme",
   "dependencies": {
     "chromedriver": "^103.0.0",
+    "dotenv": "^16.0.1",
     "selenium-webdriver": "^4.3.0"
   }
 }
