@@ -1,5 +1,6 @@
 const {Builder, By, Capabilities} = require('selenium-webdriver');
 const chromedriver = require('chromedriver');
+const xpaths = require('./xpaths');
 require('dotenv').config();
 
 
@@ -7,6 +8,7 @@ require('dotenv').config();
 
 async function main() {
 
+    // 'eager' means that the get command will be considered complete when the DOM of the page is loaded
     const caps = new Capabilities();
     caps.setPageLoadStrategy("eager");
 
@@ -17,7 +19,7 @@ async function main() {
         await driver.get("https://www.nottingham.ac.uk/sport/membership/member-login.aspx");
 
         // press login
-        await driver.findElement(By.xpath('//*[@id="content"]/div[2]/div[2]/div/a')).click();
+        await driver.findElement(By.xpath(`${xpaths.buttonToOpenLoginPage}`)).click();
         //console.log(await driver.getCurrentUrl());
 
         // open new tab
@@ -27,13 +29,12 @@ async function main() {
         await driver.switchTo().window(tabs[1]);
 
         // input log in details
-        await driver.findElement(By.xpath('//*[@id="username"]')).sendKeys(process.env.USERNAME);
-        await driver.findElement(By.xpath('//*[@id="password"]')).sendKeys(process.env.PASSWORD);
+        await driver.findElement(By.xpath(`${xpaths.usernameField}`)).sendKeys(process.env.USERNAME);
+        await driver.findElement(By.xpath(`${xpaths.passwordField}`)).sendKeys(process.env.PASSWORD);
 
         // click login
-        driver.findElement(By.xpath('/html/body/div[1]/div/div/div[1]/form/div[3]/button')).click();
+        driver.findElement(By.xpath(`${xpaths.buttonToLogIntoBookingWebsite}`)).click();
 
-        
 
         
     } catch (error) {
