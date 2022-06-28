@@ -11,7 +11,7 @@ async function main() {
     
     // 'eager' means that the get command will be considered complete when the DOM of the page is loaded
     const caps = new Capabilities();
-    caps.setPageLoadStrategy("eager");
+    caps.setPageLoadStrategy("none");
     
     try {
         let driver = await new Builder().withCapabilities(caps).forBrowser("chrome").build();
@@ -19,8 +19,8 @@ async function main() {
         await driver.get("https://www.nottingham.ac.uk/sport/membership/member-login.aspx");
 
         // press login
-        let buttonToOpenLoginPage = await returnXpathElementPromise(driver, xpaths.buttonToOpenLoginPage);
-        await buttonToOpenLoginPage.click();
+        let buttonToOpenLoginPage = returnXpathElement(driver, xpaths.buttonToOpenLoginPage);
+        await buttonToOpenLoginPage.click()
 
         // open new tab
         // switch focus of the driver to new tab
@@ -30,10 +30,10 @@ async function main() {
         LogIntoBookingWebsite(driver);
         
         // click make booking button
-        let buttonMakeBooking = await returnXpathElementPromise(driver, xpaths.buttonMakeBooking);
+        let buttonMakeBooking = returnXpathElement(driver, xpaths.buttonMakeBooking);
         await buttonMakeBooking.click();
         
-        let fieldToSelectSportCentre = await returnXpathElementPromise(driver, xpaths.fieldToSelectSportCentre);
+        let fieldToSelectSportCentre = returnXpathElement(driver, xpaths.fieldToSelectSportCentre);
         await fieldToSelectSportCentre.click();
 
         // working fully up till this point
@@ -57,17 +57,17 @@ async function main() {
 }
 
 async function LogIntoBookingWebsite(driver){
-    let usernameField = await returnXpathElementPromise(driver, xpaths.usernameField);
+    let usernameField = returnXpathElement(driver, xpaths.usernameField);
     await usernameField.sendKeys(process.env.USERNAME);
 
-    let passwordField = await returnXpathElementPromise(driver, xpaths.passwordField);
+    let passwordField = returnXpathElement(driver, xpaths.passwordField);
     await passwordField.sendKeys(process.env.PASSWORD);
 
-    let buttonToLogIntoBookingWebsite = await returnXpathElementPromise(driver, xpaths.buttonToLogIntoBookingWebsite)
+    let buttonToLogIntoBookingWebsite = returnXpathElement(driver, xpaths.buttonToLogIntoBookingWebsite)
     await buttonToLogIntoBookingWebsite.click();
 }
 
-function returnXpathElementPromise(driver, xpath) {
+function returnXpathElement(driver, xpath) {
     return driver.wait(until.elementLocated(By.xpath(`${xpath}`)), 60000);
 }
 
