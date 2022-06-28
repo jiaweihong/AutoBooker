@@ -3,15 +3,11 @@ const chromedriver = require('chromedriver');
 const xpaths = require('./xpaths');
 require('dotenv').config();
 
-
-// problem: takes too long to load page fully then click login, find a way to press log in button as soon as it shows up
-
-
 async function main() {
     
     // 'eager' means that the get command will be considered complete when the DOM of the page is loaded
     const caps = new Capabilities();
-    caps.setPageLoadStrategy("none");
+    caps.setPageLoadStrategy("eager");
     
     try {
         let driver = await new Builder().withCapabilities(caps).forBrowser("chrome").build();
