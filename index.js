@@ -1,7 +1,7 @@
 const {Builder, By, Capabilities, until, Key} = require('selenium-webdriver');
 const chromedriver = require('chromedriver');
 const xpaths = require('./xpaths');
-const { listOfActivitiesDiv } = require('./xpaths');
+const { listOfActivitiesDiv, timeDivOfBookingSlot } = require('./xpaths');
 require('dotenv').config();
 
 async function main() {
@@ -27,10 +27,9 @@ async function main() {
         
         LogIntoBookingWebsite(driver);
         
-
-        let makeBookingButton = returnXpathElement(driver, xpaths.makeBookingButton);
-        await makeBookingButton.click();
-
+        let makeBookingButton = await driver.wait(until.elementsLocated(By.css('a[data-test-id="account-bookings-dropins"]')), 60000);
+        await makeBookingButton[1].click();
+        
         // for now, we use statically set the users input.
         let sportsCentreChosen = 0;
         // need user input on whether to select david ross or jubilee
@@ -63,101 +62,98 @@ function returnXpathElement(driver, xpath) {
 }
 
 async function BookActivityDavidRoss(driver, activityType, categoryType) {
-    /*
-    activityType
-    Volleyball - Hall C/D  = 0
-    Basketball 1/2 Court - Hall A/B = 1
-    Basketball Full Court - Hall A/B = 2
-    Basketball Cross Court - Hall C/D (Near) = 3
-    Basketball 1/2 Court - Hall C/D = 4
-    Basketball Cross Court - Hall C/D (Far) = 5
-    Basketball Full Court - Hall C/D = 6
-    */
-   
-   try {
-        let selectSportCentreField = returnXpathElement(driver, xpaths.selectSportCentreField);
-        await selectSportCentreField.click();
+    let selectSportCentreField = returnXpathElement(driver, xpaths.selectSportCentreField);
+    await selectSportCentreField.click();
 
-        let davidRossField = returnXpathElement(driver, xpaths.davidRoss);
-        await davidRossField.click();
+    let davidRossField = returnXpathElement(driver, xpaths.davidRoss);
+    await davidRossField.click();
 
-        if (categoryType == 0 ){
-            let sportsHallRadioButton = returnXpathElement(driver, xpaths.sportsHall);
-            await sportsHallRadioButton.click();
-        }
+    if (categoryType == 0 ){
+        let sportsHallRadioButton = returnXpathElement(driver, xpaths.sportsHall);
+        await sportsHallRadioButton.click();
+    }
 
-        // needs to dynamically find the right div containing the correct activity type
+    // needs to dynamically find the right div containing the correct activity type
+    
+    if (activityType == 0 ){
+        let volleyball_CD = await driver.wait(until.elementLocated(By.id('booking-activity-option279')));
+        await volleyball_CD.click();
+    } else if (activityType == 1){
+
+    } else if (activityType == 2){
         
-        if (activityType == 0 ){
-            let volleyball_CD = await driver.wait(until.elementLocated(By.id('booking-activity-option279')));
-            await volleyball_CD.click();
-        } else if (activityType == 1){
+    } else if (activityType == 3){
+        
+    } else if (activityType == 4){
+        
+    } else if (activityType == 5){
 
-        } else if (activityType == 2){
-            
-        } else if (activityType == 3){
-            
-        } else if (activityType == 4){
-            
-        } else if (activityType == 5){
-    
-        } else if (activityType == 6){
-            
-        }
-        console.log("about clicked view time");
-
-        let viewTimeTableButton = returnXpathElement(driver, xpaths.viewTimetableButton);
-        await viewTimeTableButton.click();
-        console.log("clicked view time");
-
-        bookActivity(driver, "08:00", "01 Jul 2022");
-    } catch (error) {
-        console.log(`bookActivity function has thrown an error. ${error.message}`);
+    } else if (activityType == 6){
+        
     }
+
+    let viewTimeTableButton = returnXpathElement(driver, xpaths.viewTimetableButton);
+    await viewTimeTableButton.click();
+
+    bookActivity(driver, "13:00", "04 Jul 2022");
 }
 
-async function bookActivity(driver, time, date){
-    try {
-        selectDate(driver, date);
+async function bookActivity(driver, userSelectedTime, userSelectedDate){
+    selectDate(driver, userSelectedDate);
 
-        // make sure activity slots have been loaded 
-        let toMakeSureActivitySlotsAreLoaded = await driver.wait(until.elementLocated(By.className("col-xs-12 col-sm-6 col-md-6 col-lg-4")));
-    
-        // loop through each activitySlot
-        let listOfActivitySlots = await driver.findElements(By.className("col-xs-12 col-sm-6 col-md-6 col-lg-4"));
-        console.log(listOfActivitySlots.length)
-        for (let activitySlot of listOfActivitySlots){
-            let activitySlotAnchor = await activitySlot.findElement(By.css("A"));
-    
-            let timeDiv = activitySlotAnchor.findElement(By.css(".timeOfDay"));
-            let timeFromActivitySlot = await timeDiv.getText();
-    
-            console.log(timeFromActivitySlot);
-    
-            if (timeFromActivitySlot == time) {
-                await activitySlotAnchor.click();
-                break;
-            } else {
-                continue;
-            }
-        }
-    } catch (error) {
-        console.log(`BookActivityDavidRoss function has thrown an error. ${error.message}`);
-    }
+    let slot = await getSlot(driver, userSelectedTime)
+
+    bookSlot(driver, slot);
 }
 
 
-async function selectDate(driver, date){
+async function selectDate(driver, userSelectedDate){
     let dateField = await driver.wait(until.elementLocated(By.id("unique-identifier-2")));
     await dateField.clear();
-    await dateField.sendKeys(date);
+    await dateField.sendKeys(userSelectedDate);
     await dateField.sendKeys(Key.ENTER);
 
     let dateText = await dateField.getAttribute("value");
 
-    if (date != dateText){
-        throw new Error(`User's selected date is invalid. User Input: ${date}, Date Field: ${dateText}`);
+    if (userSelectedDate != dateText){
+        throw new Error(`User's selected date is invalid. User Input: ${userSelectedDate}, Date Field: ${dateText}`);
     }
+}
+
+async function getSlot(driver, userSelectedTime) {
+    let listOfSlots = await driver.wait(until.elementsLocated(By.className("col-xs-12 col-sm-6 col-md-6 col-lg-4")));
+
+    for (let slot of listOfSlots){
+        let slotAnchor = await slot.findElement(By.css("A"));
+        let timeDiv = slotAnchor.findElement(By.css(".timeOfDay"));
+        let timeTextFromSlot = await timeDiv.getText();
+        
+        let spaceDetailsText = await slot.findElement(By.css(".spaceDetails")).getText();
+
+        let count = 0;
+        while (spaceDetailsText == ""){
+            if (count == 0){
+                spaceDetailsText = await slot.findElement(By.css(".spaceDetailsFull")).getText();
+            } else if (count == 1) {
+                spaceDetailsText = await slot.findElement(By.css(".spaceDetailsBasket")).getText();
+            }
+            count++;
+        }
+
+        if (userSelectedTime == timeTextFromSlot && spaceDetailsText != "Full") {
+            return slotAnchor;
+        } else if (spaceDetailsText == "Full") {
+            throw new Error("The slot selected is full")
+        } 
+    }
+}
+
+async function bookSlot(driver, slot){
+    await slot.click();
+
+    let button = await driver.wait(until.elementLocated(By.css('button[data-test-id="bookings-sportshall-activitydetails-addandbookanother"]')), 60000);
+
+    await driver.executeScript("arguments[0].click();", button);
 }
 
 
