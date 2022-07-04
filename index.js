@@ -112,55 +112,52 @@ async function BookActivityDavidRoss(driver, activityType, categoryType) {
 
         bookActivity(driver, "08:00", "01 Jul 2022");
     } catch (error) {
-        console.log(error);
+        console.log(`bookActivity function has thrown an error. ${error.message}`);
     }
 }
 
-async function bookActivity(driver, timeToBook, date){
-    // get a list of booking slots
-    // for each slot
+async function bookActivity(driver, time, date){
+    try {
+        selectDate(driver, date);
+
+        // make sure activity slots have been loaded 
+        let toMakeSureActivitySlotsAreLoaded = await driver.wait(until.elementLocated(By.className("col-xs-12 col-sm-6 col-md-6 col-lg-4")));
     
+        // loop through each activitySlot
+        let listOfActivitySlots = await driver.findElements(By.className("col-xs-12 col-sm-6 col-md-6 col-lg-4"));
+        console.log(listOfActivitySlots.length)
+        for (let activitySlot of listOfActivitySlots){
+            let activitySlotAnchor = await activitySlot.findElement(By.css("A"));
+    
+            let timeDiv = activitySlotAnchor.findElement(By.css(".timeOfDay"));
+            let timeFromActivitySlot = await timeDiv.getText();
+    
+            console.log(timeFromActivitySlot);
+    
+            if (timeFromActivitySlot == time) {
+                await activitySlotAnchor.click();
+                break;
+            } else {
+                continue;
+            }
+        }
+    } catch (error) {
+        console.log(`BookActivityDavidRoss function has thrown an error. ${error.message}`);
+    }
+}
+
+
+async function selectDate(driver, date){
     let dateField = await driver.wait(until.elementLocated(By.id("unique-identifier-2")));
     await dateField.clear();
     await dateField.sendKeys(date);
     await dateField.sendKeys(Key.ENTER);
 
+    let dateText = await dateField.getAttribute("value");
 
-
-    // make sure activity slots have been loaded 
-    let toMakeSureActivitySlotsAreLoaded = await driver.wait(until.elementLocated(By.className("col-xs-12 col-sm-6 col-md-6 col-lg-4")));
-
-    // loop through each activitySlot
-    let listOfActivitySlots = await driver.findElements(By.className("col-xs-12 col-sm-6 col-md-6 col-lg-4"));
-    console.log(listOfActivitySlots.length)
-    for (let activitySlot of listOfActivitySlots){
-        let activitySlotAnchor = await activitySlot.findElement(By.css("A"));
-
-        let timeDiv = activitySlotAnchor.findElement(By.css(".timeOfDay"));
-        let timeFromAcitivitySlot = await timeDiv.getText();
-        
-        console.log(timeFromAcitivitySlot);
-
-        if (timeFromAcitivitySlot == timeToBook) {
-
-            await activitySlotAnchor.click();
-            break;
-        } else {
-            continue;
-        }
+    if (date != dateText){
+        throw new Error(`User's selected date is invalid. User Input: ${date}, Date Field: ${dateText}`);
     }
-
-    // get child div with class name well-sm activityBox
-    // get child div row
-    // get child div timeofday.innertext
-    // if matches time arg
-    // click on div
-
-
-
-   
-    
-
 }
 
 
