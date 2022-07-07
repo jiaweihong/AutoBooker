@@ -6,43 +6,6 @@ require('dotenv').config();
 
 const userData = require('./data.json');
 
-async function main() {
-    // 'eager' means that the get command will be considered complete when the DOM of the page is loaded
-    const caps = new Capabilities();
-    caps.setPageLoadStrategy("eager");
-    
-    try {
-        let driver = await new Builder().withCapabilities(caps).forBrowser("chrome").build();
-        
-        // opens up page
-        await driver.get("https://www.nottingham.ac.uk/sport/membership/member-login.aspx");
-
-        // press login
-        let openLoginPageButton = returnXpathElement(driver, xpaths.openLoginPageButton);
-        await openLoginPageButton.click()
-
-        // open new tab
-        // switch focus of the driver to new tab
-        let tabs = await driver.getAllWindowHandles();
-        driver.switchTo().window(tabs[1]);
-        
-        LogIntoBookingWebsite(driver);
-        
-        // This css selector returns 2 elements, 0th is not interactable and 1st index is.
-        let makeBookingButton = await driver.wait(until.elementsLocated(By.css('a[data-test-id="account-bookings-dropins"]')), 60000);
-        await makeBookingButton[1].click();
-
-        if (userData.sportCentreNum == 30) {
-            await bookActivityDavidRoss(driver, userData);
-        } else if (sportsCentreChosen == 1) {
-            await BookActivityJubileeCampus();
-        }
-        
-    } catch (error) {
-        console.log(error);
-    }
-}
-
 async function LogIntoBookingWebsite(driver){
     let usernameField = returnXpathElement(driver, xpaths.usernameField);
     await usernameField.sendKeys(process.env.USERNAME);
@@ -90,7 +53,6 @@ async function bookActivity(driver, userData){
 
     await bookSlot(driver, slot);
 }
-
 
 async function selectDate(driver, userData){
     let dateField = await driver.wait(until.elementLocated(By.id("unique-identifier-2")));
@@ -140,5 +102,33 @@ async function bookSlot(driver, slot){
     await driver.executeScript("arguments[0].click();", button);
 }
 
+
+async function main() {
+    // 'eager' means that the get command will be considered complete when the DOM of the page is loaded
+    const caps = new Capabilities();
+    caps.setPageLoadStrategy("eager");
+    
+    try {
+        let driver = await new Builder().withCapabilities(caps).forBrowser("chrome").build();
+        
+        // opens up page
+        await driver.get("https://sso.legendonlineservices.co.uk/sso/nottingham/enterprise");
+        
+        LogIntoBookingWebsite(driver);
+        
+        // This css selector returns 2 elements, 0th is not interactable and 1st index is.
+        let makeBookingButton = await driver.wait(until.elementsLocated(By.css('a[data-test-id="account-bookings-dropins"]')), 60000);
+        await makeBookingButton[1].click();
+
+        if (userData.sportCentreNum == 30) {
+            await bookActivityDavidRoss(driver, userData);
+        } else if (sportsCentreChosen == 1) {
+            await bookActivityJubileeCampus();
+        }
+        
+    } catch (error) {
+        console.log(error);
+    }
+}
 
 main();
