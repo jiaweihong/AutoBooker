@@ -27,6 +27,7 @@ async function main() {
         
         LogIntoBookingWebsite(driver);
         
+        // This css selector returns 2 elements, 0th is not interactable and 1st index is.
         let makeBookingButton = await driver.wait(until.elementsLocated(By.css('a[data-test-id="account-bookings-dropins"]')), 60000);
         await makeBookingButton[1].click();
         
@@ -35,9 +36,9 @@ async function main() {
         // need user input on whether to select david ross or jubilee
 
         if (sportsCentreChosen == 0) {
-            BookActivityDavidRoss(driver, 0, 0);
+            await BookActivityDavidRoss(driver, 0, 0);
         } else if (sportsCentreChosen == 1) {
-            BookActivityJubileeCampus();
+            await BookActivityJubileeCampus();
         }
         
     } catch (error) {
@@ -95,15 +96,15 @@ async function BookActivityDavidRoss(driver, activityType, categoryType) {
     let viewTimeTableButton = returnXpathElement(driver, xpaths.viewTimetableButton);
     await viewTimeTableButton.click();
 
-    bookActivity(driver, "13:00", "04 Jul 2022");
+    await bookActivity(driver, "13:00", "04 Jul 2022");
 }
 
 async function bookActivity(driver, userSelectedTime, userSelectedDate){
-    selectDate(driver, userSelectedDate);
+    await selectDate(driver, userSelectedDate);
 
     let slot = await getSlot(driver, userSelectedTime)
 
-    bookSlot(driver, slot);
+    await bookSlot(driver, slot);
 }
 
 
@@ -152,7 +153,6 @@ async function bookSlot(driver, slot){
     await slot.click();
 
     let button = await driver.wait(until.elementLocated(By.css('button[data-test-id="bookings-sportshall-activitydetails-addandbookanother"]')), 60000);
-
     await driver.executeScript("arguments[0].click();", button);
 }
 
