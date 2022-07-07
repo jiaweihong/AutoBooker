@@ -4,10 +4,9 @@ const xpaths = require('./xpaths');
 const { listOfActivitiesDiv, timeDivOfBookingSlot } = require('./xpaths');
 require('dotenv').config();
 
-const user = require('./data.json');
+const userData = require('./data.json');
 
 async function main() {
-    console.log(user);
     // 'eager' means that the get command will be considered complete when the DOM of the page is loaded
     const caps = new Capabilities();
     caps.setPageLoadStrategy("eager");
@@ -33,8 +32,8 @@ async function main() {
         let makeBookingButton = await driver.wait(until.elementsLocated(By.css('a[data-test-id="account-bookings-dropins"]')), 60000);
         await makeBookingButton[1].click();
 
-        if (sportsCentreChosen == 30) {
-            await bookActivityDavidRoss(driver, 279);
+        if (userData.sportCentreNum == 30) {
+            await bookActivityDavidRoss(driver, userData);
         } else if (sportsCentreChosen == 1) {
             await BookActivityJubileeCampus();
         }
@@ -59,16 +58,16 @@ function returnXpathElement(driver, xpath) {
     return driver.wait(until.elementLocated(By.xpath(`${xpath}`)), 60000);
 }
 
-async function bookActivityDavidRoss(driver, activityType) {
-    await selectClubCategoryActivities(driver, activityType);
+async function bookActivityDavidRoss(driver, userData) {
+    await selectClubCategoryActivities(driver, userData);
 
     let viewTimeTableButton = returnXpathElement(driver, xpaths.viewTimetableButton);
     await viewTimeTableButton.click();
 
-    await bookActivity(driver, "13:00", "04 Jul 2022");
+    await bookActivity(driver, userData);
 }
 
-async function selectClubCategoryActivities(driver, activityType){
+async function selectClubCategoryActivities(driver, userData){
     let selectSportCentreField = returnXpathElement(driver, xpaths.selectSportCentreField);
     await selectSportCentreField.click();
 
@@ -78,35 +77,35 @@ async function selectClubCategoryActivities(driver, activityType){
     let sportsHallRadioButton = returnXpathElement(driver, xpaths.sportsHall);
     await sportsHallRadioButton.click();
     
-    if (activityType == 279 ){
+    if (userData.activityNum == 279 ){
         let volleyball_CD = await driver.wait(until.elementLocated(By.id('booking-activity-option279')));
         await volleyball_CD.click();
     } 
 }
 
-async function bookActivity(driver, userSelectedTime, userSelectedDate){
-    await selectDate(driver, userSelectedDate);
+async function bookActivity(driver, userData){
+    await selectDate(driver, userData);
 
-    let slot = await getSlot(driver, userSelectedTime)
+    let slot = await getSlot(driver, userData)
 
     await bookSlot(driver, slot);
 }
 
 
-async function selectDate(driver, userSelectedDate){
+async function selectDate(driver, userData){
     let dateField = await driver.wait(until.elementLocated(By.id("unique-identifier-2")));
     await dateField.clear();
-    await dateField.sendKeys(userSelectedDate);
+    await dateField.sendKeys(userData.activityDate);
     await dateField.sendKeys(Key.ENTER);
 
     let dateText = await dateField.getAttribute("value");
 
-    if (userSelectedDate != dateText){
-        throw new Error(`User's selected date is invalid. User Input: ${userSelectedDate}, Date Field: ${dateText}`);
+    if (userData.activityDate != dateText){
+        throw new Error(`User's selected date is invalid. User Input: ${userData.activityDate}, Date Field: ${dateText}`);
     }
 }
 
-async function getSlot(driver, userSelectedTime) {
+async function getSlot(driver, userData) {
     let listOfSlots = await driver.wait(until.elementsLocated(By.className("col-xs-12 col-sm-6 col-md-6 col-lg-4")));
 
     for (let slot of listOfSlots){
@@ -126,7 +125,7 @@ async function getSlot(driver, userSelectedTime) {
             count++;
         }
 
-        if (userSelectedTime == timeTextFromSlot && spaceDetailsText != "Full") {
+        if (userData.activityTime == timeTextFromSlot && spaceDetailsText != "Full") {
             return slotAnchor;
         } else if (spaceDetailsText == "Full") {
             throw new Error("The slot selected is full")
