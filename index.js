@@ -32,13 +32,9 @@ async function main() {
         // This css selector returns 2 elements, 0th is not interactable and 1st index is.
         let makeBookingButton = await driver.wait(until.elementsLocated(By.css('a[data-test-id="account-bookings-dropins"]')), 60000);
         await makeBookingButton[1].click();
-        
-        // for now, we use statically set the users input.
-        let sportsCentreChosen = 0;
-        // need user input on whether to select david ross or jubilee
 
-        if (sportsCentreChosen == 0) {
-            await bookActivityDavidRoss(driver, 0);
+        if (sportsCentreChosen == 30) {
+            await bookActivityDavidRoss(driver, 279);
         } else if (sportsCentreChosen == 1) {
             await BookActivityJubileeCampus();
         }
@@ -64,7 +60,7 @@ function returnXpathElement(driver, xpath) {
 }
 
 async function bookActivityDavidRoss(driver, activityType) {
-    await selectClubCategoryActivities();
+    await selectClubCategoryActivities(driver, activityType);
 
     let viewTimeTableButton = returnXpathElement(driver, xpaths.viewTimetableButton);
     await viewTimeTableButton.click();
@@ -72,7 +68,7 @@ async function bookActivityDavidRoss(driver, activityType) {
     await bookActivity(driver, "13:00", "04 Jul 2022");
 }
 
-async function selectClubCategoryActivities(){
+async function selectClubCategoryActivities(driver, activityType){
     let selectSportCentreField = returnXpathElement(driver, xpaths.selectSportCentreField);
     await selectSportCentreField.click();
 
