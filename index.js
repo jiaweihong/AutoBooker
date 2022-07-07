@@ -4,8 +4,10 @@ const xpaths = require('./xpaths');
 const { listOfActivitiesDiv, timeDivOfBookingSlot } = require('./xpaths');
 require('dotenv').config();
 
+const user = require('./data.json');
+
 async function main() {
-    
+    console.log(user);
     // 'eager' means that the get command will be considered complete when the DOM of the page is loaded
     const caps = new Capabilities();
     caps.setPageLoadStrategy("eager");
@@ -36,7 +38,7 @@ async function main() {
         // need user input on whether to select david ross or jubilee
 
         if (sportsCentreChosen == 0) {
-            await BookActivityDavidRoss(driver, 0, 0);
+            await bookActivityDavidRoss(driver, 0);
         } else if (sportsCentreChosen == 1) {
             await BookActivityJubileeCampus();
         }
@@ -45,7 +47,6 @@ async function main() {
         console.log(error);
     }
 }
-
 
 async function LogIntoBookingWebsite(driver){
     let usernameField = returnXpathElement(driver, xpaths.usernameField);
@@ -62,41 +63,29 @@ function returnXpathElement(driver, xpath) {
     return driver.wait(until.elementLocated(By.xpath(`${xpath}`)), 60000);
 }
 
-async function BookActivityDavidRoss(driver, activityType, categoryType) {
+async function bookActivityDavidRoss(driver, activityType) {
+    await selectClubCategoryActivities();
+
+    let viewTimeTableButton = returnXpathElement(driver, xpaths.viewTimetableButton);
+    await viewTimeTableButton.click();
+
+    await bookActivity(driver, "13:00", "04 Jul 2022");
+}
+
+async function selectClubCategoryActivities(){
     let selectSportCentreField = returnXpathElement(driver, xpaths.selectSportCentreField);
     await selectSportCentreField.click();
 
     let davidRossField = returnXpathElement(driver, xpaths.davidRoss);
     await davidRossField.click();
 
-    if (categoryType == 0 ){
-        let sportsHallRadioButton = returnXpathElement(driver, xpaths.sportsHall);
-        await sportsHallRadioButton.click();
-    }
-
-    // needs to dynamically find the right div containing the correct activity type
+    let sportsHallRadioButton = returnXpathElement(driver, xpaths.sportsHall);
+    await sportsHallRadioButton.click();
     
-    if (activityType == 0 ){
+    if (activityType == 279 ){
         let volleyball_CD = await driver.wait(until.elementLocated(By.id('booking-activity-option279')));
         await volleyball_CD.click();
-    } else if (activityType == 1){
-
-    } else if (activityType == 2){
-        
-    } else if (activityType == 3){
-        
-    } else if (activityType == 4){
-        
-    } else if (activityType == 5){
-
-    } else if (activityType == 6){
-        
-    }
-
-    let viewTimeTableButton = returnXpathElement(driver, xpaths.viewTimetableButton);
-    await viewTimeTableButton.click();
-
-    await bookActivity(driver, "13:00", "04 Jul 2022");
+    } 
 }
 
 async function bookActivity(driver, userSelectedTime, userSelectedDate){
