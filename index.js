@@ -114,11 +114,9 @@ async function main() {
         // opens up page
         await driver.get("https://sso.legendonlineservices.co.uk/sso/nottingham/enterprise");
         
-        LogIntoBookingWebsite(driver);
-        
-        // This css selector returns 2 elements, 0th is not interactable and 1st index is.
-        let makeBookingButton = await driver.wait(until.elementsLocated(By.css('a[data-test-id="account-bookings-dropins"]')), 60000);
-        await makeBookingButton[1].click();
+        await LogIntoBookingWebsite(driver);
+
+        await driver.navigate().to("https://universityofnottingham.legendonlineservices.co.uk/enterprise/bookingscentre/index");
 
         if (userData.sportCentreNum == 30) {
             await bookActivityDavidRoss(driver, userData);
