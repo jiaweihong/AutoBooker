@@ -18,11 +18,3 @@ const xpaths = {
 };
 
 module.exports = xpaths;
-
-//*[@id="select2-301c-result-v6sq-479"]/ul/li[1]
-
-//*[@id="select2-301c-result-v6sq-479"]/ul/li[1]
-
-//*[@id="select2-r8gg-result-vuwr-479"]/ul/li[1]
-
-///html/body/span[2]/span/span/ul/li[1]/ul/li[1]

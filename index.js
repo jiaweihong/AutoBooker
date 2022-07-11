@@ -1,7 +1,5 @@
 const {Builder, By, Capabilities, until, Key} = require('selenium-webdriver');
 const chromedriver = require('chromedriver');
-const xpaths = require('./xpaths');
-const { listOfActivitiesDiv, timeDivOfBookingSlot } = require('./xpaths');
 require('dotenv').config();
 
 const userData = require('./data.json');
@@ -104,12 +102,17 @@ async function getSlot(driver, userData) {
             count++;
         }
 
-        if (userData.activityTime == timeTextFromSlot && spaceDetailsText != "Full") {
-            return slotAnchor;
-        } else if (spaceDetailsText == "Full") {
-            throw new Error("The slot selected is full")
-        } 
+        if (userData.activityTime == timeTextFromSlot) {
+            if (spaceDetailsText != "Full"){
+                return slotAnchor;
+            } else {
+                throw new Error("The slot selected is full.")
+            }
+        }
     }
+
+    // if the code execution gets to this point, then that means that the userData.activityTime did not match any time slot.
+    throw new Error("The time slot selected does not exist.")
 }
 
 async function buyNowSlot(driver, slot){
@@ -119,6 +122,14 @@ async function buyNowSlot(driver, slot){
     await driver.executeScript("arguments[0].click();", button);
 }
 
+async function payForBookings(driver){
+    let basketSummaryContinueButton = await driver.wait(until.elementLocated(By.css('button[data-test-id="universalbasket-paymentsummary-continueoptions-continue"]')));
+    await basketSummaryContinueButton.click();
+
+    await basketSummaryContinueButton.click();
+
+    // next button pressed will be a pay now and we are not implementing that yet, as i do not have a membership;
+}
 
 async function main() {
     // 'eager' means that the get command will be considered complete when the DOM of the page is loaded
@@ -135,7 +146,11 @@ async function main() {
 
         await driver.navigate().to("https://universityofnottingham.legendonlineservices.co.uk/enterprise/bookingscentre/index");
 
-        bookActivity(driver, userData);
+        await bookActivity(driver, userData);
+        //.setChromeOptions(new chrome.Options().addArguments('--headless'))
+
+        await payForBookings(driver);
+        console.log("activity booked");
     } catch (error) {
         console.log(error);
     }
