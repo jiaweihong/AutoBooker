@@ -167,4 +167,4 @@ async function bookActivity() {
     }
 }
 
-bookActivity();
+module.exports = bookActivity;
