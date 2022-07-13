@@ -37,12 +37,13 @@ async function selectSportCentreCategoryActivity(driver, userData){
 
 async function selectSportCentre(driver, sportCentre) {
     let selectSportCentreField = await driver.wait(until.elementLocated(By.css('input[class="select2-search__field"]')), 30000);
+    
     await selectSportCentreField.click();
 
     let sportCentreUl = await driver.wait(until.elementLocated(By.css('ul[class="select2-results__options select2-results__options--nested"]')), 30000);
 
     let sportCentreList = await sportCentreUl.findElements(By.css('li'), 30000);
-    
+
     if (sportCentre == "David Ross") {
         await sportCentreList[0].click();
     } else if (sportCentre == "Jubilee Campus") {
@@ -141,19 +142,20 @@ async function main() {
     caps.setPageLoadStrategy("eager");
 
     const options = new chrome.Options();
-    //options.addArguments('--headless');
-    //options.addArguments("--window-size=1920,1080");
-    //options.addArguments("--disable-gpu");
-    //options.addArguments("--no-sandbox");
+    options.addArguments('--headless');
+    options.addArguments("--window-size=1920,1080");
+    options.addArguments("--disable-gpu");
+    options.addArguments("--no-sandbox");
+    let driver = await new Builder().withCapabilities(caps).forBrowser("chrome").setChromeOptions(options).build();
     
     try {
-        let driver = await new Builder().withCapabilities(caps).forBrowser("chrome").setChromeOptions(options).build();
         
         // opens up page
         await driver.get("https://sso.legendonlineservices.co.uk/sso/nottingham/enterprise");
         
         await LogIntoBookingWebsite(driver);
-        console.log("log");
+
+        console.log("logged");
 
         await driver.navigate().to("https://universityofnottingham.legendonlineservices.co.uk/enterprise/bookingscentre/index");
 
@@ -163,8 +165,14 @@ async function main() {
 
         //await payForBookings(driver);
 
-        //await driver.quit();
+        await driver.quit();
     } catch (error) {
+        driver.takeScreenshot().then(
+            function(image) {
+                require('fs').writeFileSync('2.png', image, 'base64');
+            }
+        );
+        console.log(await driver.getCurrentUrl());
         console.log(error);
     }
 }
