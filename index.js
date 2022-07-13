@@ -3,7 +3,7 @@ const bodyParser = require('body-parser');
 const bookActivity = require('./bookActivity.js')
 
 const app = express();
-const port = process.env.PORT || 3000;
+const port = process.env.PORT || 3001;
 
 // support parsing of application/json type post data
 app.use(bodyParser.json());
