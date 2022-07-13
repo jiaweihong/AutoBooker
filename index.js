@@ -17,6 +17,9 @@ async function LogIntoBookingWebsite(driver){
 }
 
 async function bookActivity(driver, userData) {
+    let makeBookingButton = await driver.wait(until.elementsLocated(By.css('a[data-test-id="account-bookings-dropins"]')), 60000);
+    await makeBookingButton[1].click();
+
     await selectSportCentreCategoryActivity(driver, userData);
 
     await buyNowActivity(driver, userData);
@@ -155,10 +158,6 @@ async function main() {
         
         await LogIntoBookingWebsite(driver);
 
-        console.log("logged");
-
-        await driver.navigate().to("https://universityofnottingham.legendonlineservices.co.uk/enterprise/bookingscentre/index");
-
         await bookActivity(driver, userData);
 
         //await driver.navigate().to("https://universityofnottingham.legendonlineservices.co.uk/enterprise/universalbasket/summary");
@@ -167,12 +166,6 @@ async function main() {
 
         await driver.quit();
     } catch (error) {
-        driver.takeScreenshot().then(
-            function(image) {
-                require('fs').writeFileSync('2.png', image, 'base64');
-            }
-        );
-        console.log(await driver.getCurrentUrl());
         console.log(error);
     }
 }
