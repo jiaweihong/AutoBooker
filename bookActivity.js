@@ -17,12 +17,7 @@ async function LogIntoBookingWebsite(driver){
 }
 
 async function bookActivity(driver, userData) {
-    let makeBookingButton = await driver.wait(until.elementsLocated(By.css('a[data-test-id="account-bookings-dropins"]')), 60000);
-    await makeBookingButton[1].click();
-
-    await selectSportCentreCategoryActivity(driver, userData);
-
-    await buyNowActivity(driver, userData);
+    
 }
 
 async function selectSportCentreCategoryActivity(driver, userData){
@@ -40,11 +35,9 @@ async function selectSportCentreCategoryActivity(driver, userData){
 
 async function selectSportCentre(driver, sportCentre) {
     let selectSportCentreField = await driver.wait(until.elementLocated(By.css('input[class="select2-search__field"]')), 30000);
-    
     await selectSportCentreField.click();
 
     let sportCentreUl = await driver.wait(until.elementLocated(By.css('ul[class="select2-results__options select2-results__options--nested"]')), 30000);
-
     let sportCentreList = await sportCentreUl.findElements(By.css('li'), 30000);
 
     if (sportCentre == "David Ross") {
@@ -139,7 +132,7 @@ async function payForBookings(driver){
     // next button pressed will be a pay now and we are not implementing that yet, as i do not have a membership;
 }
 
-async function main() {
+async function bookActivity() {
     // 'eager' means that the get command will be considered complete when the DOM of the page is loaded
     const caps = new Capabilities();
     caps.setPageLoadStrategy("eager");
@@ -152,13 +145,17 @@ async function main() {
     let driver = await new Builder().withCapabilities(caps).forBrowser("chrome").setChromeOptions(options).build();
     
     try {
-        
         // opens up page
         await driver.get("https://sso.legendonlineservices.co.uk/sso/nottingham/enterprise");
         
         await LogIntoBookingWebsite(driver);
 
-        await bookActivity(driver, userData);
+        let makeBookingButton = await driver.wait(until.elementsLocated(By.css('a[data-test-id="account-bookings-dropins"]')), 60000);
+        await makeBookingButton[1].click();
+
+        await selectSportCentreCategoryActivity(driver, userData);
+
+        await buyNowActivity(driver, userData);
 
         //await driver.navigate().to("https://universityofnottingham.legendonlineservices.co.uk/enterprise/universalbasket/summary");
 
@@ -170,4 +167,4 @@ async function main() {
     }
 }
 
-main();
+bookActivity();
