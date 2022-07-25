@@ -1,8 +1,10 @@
-function App() {
+import Form from './Form'
+
+function App(){
   return (
-    <div>
-      hi
-    </div>
+    <>
+      <Form/>
+    </>
   )
 }
 
