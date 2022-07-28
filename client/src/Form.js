@@ -45,9 +45,6 @@ export default function Form(){
         encryptedPassword = ciphertext.toString();
     }
 
-    
-
-
   return (
     <form onSubmit={(e) => {encryptPassword(e)}}>
         <label>

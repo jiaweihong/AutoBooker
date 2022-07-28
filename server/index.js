@@ -1,6 +1,7 @@
 const express = require('express');
 const bodyParser = require('body-parser');
 const bookActivity = require('./bookActivity.js')
+const pool = require('./db.js');
 
 const app = express();
 const port = process.env.PORT || 3001;
