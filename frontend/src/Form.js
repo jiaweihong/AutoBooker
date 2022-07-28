@@ -9,7 +9,6 @@ export default function Form(){
     const [activity, setActivity] = useState('')
     const [dateTime, setDateTime] = useState(new Date());
 
-
     let davidRoss = ["Volleyball - Hall C/D"];
     let jubileeCampus = ["Volleyball - Hall 1"];
     let dropdownActivies = null;
@@ -17,6 +16,7 @@ export default function Form(){
 
     let activityDate = '';
     let activityTime = '';
+    let encryptedPassword = '';
 
     if (sportCentre == "David Ross"){
         dropdownActivies = davidRoss;
@@ -30,15 +30,26 @@ export default function Form(){
 
     const monthsOfTheyear = ["Jan","Feb","Mar","Apr","May","Jun","Jul","Aug","Sep","Oct","Nov","Dec"];
 
-    const stringifyDateAndTime = () => {
+    function stringifyDateAndTime() {
         let month = monthsOfTheyear[dateTime.getMonth()];
 
         activityDate = `${dateTime.getDate()} ${month} ${dateTime.getFullYear()}`;
         activityTime = `${dateTime.getHours()}:00`;
     }
 
+    function encryptPassword(e) {
+        e.preventDefault();
+
+        var ciphertext = CryptoJs.AES.encrypt(password, process.env.REACT_APP_ENCRYPTION_SECRET);
+    
+        encryptedPassword = ciphertext.toString();
+    }
+
+    
+
+
   return (
-    <form>
+    <form onSubmit={(e) => {encryptPassword(e)}}>
         <label>
             Username
         </label>
@@ -88,7 +99,7 @@ export default function Form(){
         </label>
         <DateTimePicker onChange={setDateTime} value={dateTime} />
 
-        <button>Submit</button>
+        <button type="submit">Submit</button>
     </form>
   )
 }
