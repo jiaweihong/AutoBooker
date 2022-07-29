@@ -2,12 +2,13 @@ import React, { useState } from 'react'
 import CryptoJs from 'crypto-js';
 import DateTimePicker from 'react-datetime-picker';
 
-export default function BookingForm(){
+const BookingForm = () => {
     const [username, setUsername] = useState('');
     const [password, setPassword] = useState('');
     const [sportsCentre, setSportsCentre] = useState('David Ross');
     const [activity, setActivity] = useState('Volleyball - Hall C/D')
     const [dateTime, setDateTime] = useState(new Date());
+    dateTime.setMinutes(0);
 
     let davidRossActivities = ["Volleyball - Hall C/D"];
     let jubileeCampusActivities = ["Volleyball - Hall 1"];
@@ -113,3 +114,5 @@ export default function BookingForm(){
     </form>
   )
 }
+
+export default BookingForm;
