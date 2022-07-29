@@ -1,59 +1,61 @@
 const {Builder, By, Capabilities, until, Key} = require('selenium-webdriver');
 const chromedriver = require('chromedriver');
+const CryptoJs = require('crypto-js');
 const chrome = require('selenium-webdriver/chrome');
 require('dotenv').config();
 
-const userData = require('./data.json');
+const req = require('./data.json');
 
-async function LogIntoBookingWebsite(driver){
+async function LogIntoBookingWebsite(driver, req){
     let usernameField = await driver.wait(until.elementLocated(By.css('input[id="username"]')), 30000);
-    await usernameField.sendKeys(process.env.USERNAME);
+    await usernameField.sendKeys(req.username);
+
+    
+    var bytes = CryptoJs.AES.decrypt(req.password, process.env.REACT_APP_ENCRYPTION_KEY);
+    var password = bytes.toString(CryptoJs.enc.Utf8);
+    console.log(password);
 
     let passwordField = await driver.wait(until.elementLocated(By.css('input[id="password"]')), 30000);
-    await passwordField.sendKeys(process.env.PASSWORD);
+    await passwordField.sendKeys(password);
 
     let logIntoBookingWebsiteButton = await driver.wait(until.elementLocated(By.css('button[name="_eventId_proceed"]')), 30000);
     await logIntoBookingWebsiteButton.click();
 }
 
-async function bookActivity(driver, userData) {
-    
-}
-
-async function selectSportCentreCategoryActivity(driver, userData){
-    await selectSportCentre(driver, userData.sportCentre);
+async function selectSportsCentreCategoryActivity(driver, req){
+    await selectsSportCentre(driver, req.sports_centre);
 
     // Select category
     let sportsHallRadio = await driver.wait(until.elementLocated(By.css('input[id="booking-behaviour-option2"]')), 30000);
     await sportsHallRadio.click();
 
-    await selectActivity(driver, userData.activityNum);
+    await selectActivity(driver, req.activity);
 
     let viewTimeTableButton = await driver.wait(until.elementLocated(By.css('button[data-test-id="bookings-viewtimetable"]')), 30000);
     await viewTimeTableButton.click();
 }
 
-async function selectSportCentre(driver, sportCentre) {
-    let selectSportCentreField = await driver.wait(until.elementLocated(By.css('input[class="select2-search__field"]')), 30000);
-    await selectSportCentreField.click();
+async function selectsSportCentre(driver, sportsCentre) {
+    let selectSportsCentreField = await driver.wait(until.elementLocated(By.css('input[class="select2-search__field"]')), 30000);
+    await selectSportsCentreField.click();
 
-    let sportCentreUl = await driver.wait(until.elementLocated(By.css('ul[class="select2-results__options select2-results__options--nested"]')), 30000);
-    let sportCentreList = await sportCentreUl.findElements(By.css('li'), 30000);
+    let sportsCentreUl = await driver.wait(until.elementLocated(By.css('ul[class="select2-results__options select2-results__options--nested"]')), 30000);
+    let sportsCentreList = await sportsCentreUl.findElements(By.css('li'), 30000);
 
-    if (sportCentre == "David Ross") {
-        await sportCentreList[0].click();
-    } else if (sportCentre == "Jubilee Campus") {
-        await sportCentreList[1].click();
+    if (sportsCentre == "David Ross") {
+        await sportsCentreList[0].click();
+    } else if (sportsCentre == "Jubilee Campus") {
+        await sportsCentreList[1].click();
     } else {
         throw new Error("No valid sport centre was chosen");
     }
 }
 
-async function selectActivity(driver, activityNum){
-    if (activityNum == 279 ){
+async function selectActivity(driver, activity){
+    if (activity == "Volleyball - Hall C/D" ){
         let volleyball_DR_CD = await driver.wait(until.elementLocated(By.id('booking-activity-option279')), 30000);
         await volleyball_DR_CD.click();
-    } else if (activityNum == 87){
+    } else if (activity == "Volleyball - Hall 1"){
         let volleyball_JC_H1 = await driver.wait(until.elementLocated(By.id('booking-activity-option87')), 30000);
         await volleyball_JC_H1.click();
     } else {
@@ -61,28 +63,41 @@ async function selectActivity(driver, activityNum){
     }
 }
 
-async function buyNowActivity(driver, userData){
-    await selectDate(driver, userData);
+async function buyNowActivity(driver, req){
+    await selectDate(driver, req);
 
-    let slot = await getSlot(driver, userData)
+    let slot = await getSlot(driver, req)
 
     await buyNowSlot(driver, slot);
 }
 
-async function selectDate(driver, userData){
+function getDateOfActivity(req) {
+    const monthsOfTheyear = ["Jan","Feb","Mar","Apr","May","Jun","Jul","Aug","Sep","Oct","Nov","Dec"];
+
+    let month = monthsOfTheyear[req.activity_month];
+
+    activityDate = `${req.activity_day} ${month} ${req.activity_year}`;
+
+    return activityDate;
+}
+
+async function selectDate(driver, req){
     let dateField = await driver.wait(until.elementLocated(By.id("unique-identifier-2")), 30000);
     await dateField.clear();
-    await dateField.sendKeys(userData.activityDate);
+
+    let activityDate = getDateOfActivity(req);
+
+    await dateField.sendKeys(activityDate);
     await dateField.sendKeys(Key.ENTER);
 
     let dateText = await dateField.getAttribute("value");
 
-    if (userData.activityDate != dateText){
-        throw new Error(`User's selected date is invalid. User Input: ${userData.activityDate}, Date Field: ${dateText}`);
+    if (activityDate != dateText){
+        throw new Error(`User's selected date is invalid. User Input: ${activityDate}, Date Field: ${dateText}`);
     }
 }
 
-async function getSlot(driver, userData) {
+async function getSlot(driver, req) {
     let listOfSlots = await driver.wait(until.elementsLocated(By.className("col-xs-12 col-sm-6 col-md-6 col-lg-4")), 30000);
 
     for (let slot of listOfSlots){
@@ -102,7 +117,9 @@ async function getSlot(driver, userData) {
             count++;
         }
 
-        if (userData.activityTime == timeTextFromSlot) {
+        let activityTime = `${req.activity_hour}:00`;
+
+        if (activityTime == timeTextFromSlot) {
             if (spaceDetailsText != "Full"){
                 return slotAnchor;
             } else {
@@ -111,7 +128,7 @@ async function getSlot(driver, userData) {
         }
     }
 
-    // if the code execution gets to this point, then that means that the userData.activityTime did not match any time slot.
+    // if the code execution gets to this point, then that means that the req.activityTime did not match any time slot.
     throw new Error("The time slot selected does not exist.")
 }
 
@@ -132,7 +149,8 @@ async function payForBookings(driver){
     // next button pressed will be a pay now and we are not implementing that yet, as i do not have a membership;
 }
 
-async function bookActivity() {
+async function bookActivity(req) {
+    
     // 'eager' means that the get command will be considered complete when the DOM of the page is loaded
     const caps = new Capabilities();
     caps.setPageLoadStrategy("eager");
@@ -148,14 +166,14 @@ async function bookActivity() {
         // opens up page
         await driver.get("https://sso.legendonlineservices.co.uk/sso/nottingham/enterprise");
         
-        await LogIntoBookingWebsite(driver);
+        await LogIntoBookingWebsite(driver, req);
 
         let makeBookingButton = await driver.wait(until.elementsLocated(By.css('a[data-test-id="account-bookings-dropins"]')), 60000);
         await makeBookingButton[1].click();
 
-        await selectSportCentreCategoryActivity(driver, userData);
+        await selectSportsCentreCategoryActivity(driver, req);
 
-        await buyNowActivity(driver, userData);
+        await buyNowActivity(driver, req);
 
         //await driver.navigate().to("https://universityofnottingham.legendonlineservices.co.uk/enterprise/universalbasket/summary");
 
@@ -166,5 +184,6 @@ async function bookActivity() {
         console.log(error);
     }
 }
+
 
 module.exports = bookActivity;

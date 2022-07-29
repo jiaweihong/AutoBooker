@@ -2,6 +2,7 @@ const express = require('express');
 const bodyParser = require('body-parser');
 const bookActivity = require('./bookActivity.js')
 const pool = require('./db.js');
+const cors = require('cors');
 
 const app = express();
 const port = process.env.PORT || 3000;
@@ -10,6 +11,7 @@ const port = process.env.PORT || 3000;
 app.use(bodyParser.json());
 //support parsing of application/x-www-form-urlencoded post data
 app.use(bodyParser.urlencoded({ extended: true }));
+app.use(cors());
 
 app.get('/api/bookings', async (req, res) => {
     try {
@@ -31,7 +33,7 @@ app.post('/api/bookings', async (req, res) => {
         const {activityMonth} = req.body;
         const {activityYear} = req.body;
         const {activityHour} = req.body;
-    
+        
         const addToBook = await pool.query(`INSERT INTO to_book(username, password, sports_centre, activity, activity_day, activity_month, activity_year, activity_hour) VALUES ('${username}', '${password}', '${sportsCentre}', '${activity}', ${activityDay}, ${activityMonth}, ${activityYear}, ${activityHour}) RETURNING *`);
 
         res.json(addToBook.rows[0]);
@@ -64,6 +66,19 @@ app.delete('/api/bookings/:id', async (req, res) => {
         const deleteToBook = await pool.query(`DELETE FROM to_book WHERE to_book_id = ${id}`);
     
         res.json("Succesfully deleted");
+    } catch (error) {
+        console.error(error);
+    }
+})
+
+app.get('/api/ex_booking/:id', async (req, res) => {
+    try {
+        const {id} = req.params;
+        const booking = await pool.query(`SELECT * FROM to_book WHERE to_book_id = ${id}`);
+
+        await bookActivity(booking.rows[0]);
+
+        console.log("done");
     } catch (error) {
         console.error(error);
     }

@@ -8,4 +8,8 @@ CREATE TABLE to_book(
     activity_month INT NOT NULL,
     activity_year INT NOT NULL,
     activity_hour INT NOT NULL,
+    username VARCHAR(255) NOT NULL,
+    password VARCHAR(255) NOT NULL,
 );
+
+
