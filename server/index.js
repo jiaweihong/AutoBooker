@@ -23,6 +23,8 @@ app.get('/api/bookings', async (req, res) => {
 
 app.post('/api/bookings', async (req, res) => {
     try {
+        const {username} = req.body;
+        const {password} = req.body;
         const {sportsCentre} = req.body;
         const {activity} = req.body;
         const {activityDay} = req.body;
@@ -30,7 +32,7 @@ app.post('/api/bookings', async (req, res) => {
         const {activityYear} = req.body;
         const {activityHour} = req.body;
     
-        const addToBook = await pool.query(`INSERT INTO to_book(sports_centre, activity, activity_day, activity_month, activity_year, activity_hour) VALUES ('${sportsCentre}', '${activity}', ${activityDay}, ${activityMonth}, ${activityYear}, ${activityHour}) RETURNING *`);
+        const addToBook = await pool.query(`INSERT INTO to_book(username, password, sports_centre, activity, activity_day, activity_month, activity_year, activity_hour) VALUES ('${username}', '${password}', '${sportsCentre}', '${activity}', ${activityDay}, ${activityMonth}, ${activityYear}, ${activityHour}) RETURNING *`);
 
         res.json(addToBook.rows[0]);
     } catch (error) {

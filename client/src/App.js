@@ -1,9 +1,9 @@
-import Form from './Form'
+import BookingForm from './BookingForm'
 
 function App(){
   return (
     <>
-      <Form/>
+      <BookingForm/>
     </>
   )
 }
