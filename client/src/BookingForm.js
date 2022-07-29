@@ -41,7 +41,7 @@ const BookingForm = () => {
                 password: encryptedPassword,
                 sportsCentre: sportsCentre,
                 activity: activity,
-                activityDay: dateTime.getDay(),
+                activityDay: dateTime.getDate(),
                 activityMonth: dateTime.getMonth(),
                 activityYear: dateTime.getFullYear(),
                 activityHour: dateTime.getHours()
