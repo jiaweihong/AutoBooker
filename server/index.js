@@ -4,19 +4,24 @@ const bookActivity = require('./bookActivity.js')
 const pool = require('./db.js');
 
 const app = express();
-const port = process.env.PORT || 3001;
+const port = process.env.PORT || 3000;
 
 // support parsing of application/json type post data
 app.use(bodyParser.json());
 //support parsing of application/x-www-form-urlencoded post data
 app.use(bodyParser.urlencoded({ extended: true }));
 
-app.get('/bookActivity', async (req, res) => {
-    await bookActivity();
-    res.send("booked");
+app.get('/api/bookings', async (req, res) => {
+    try {
+        const allToBooks = await pool.query(`SELECT * FROM to_book`);
+
+        res.json(allToBooks.rows);
+    } catch (error) {
+        
+    }
 })
 
-app.post('/api/to_book', async (req, res) => {
+app.post('/api/bookings', async (req, res) => {
     try {
         const {sportsCentre} = req.body;
         const {activity} = req.body;
@@ -25,13 +30,43 @@ app.post('/api/to_book', async (req, res) => {
         const {activityYear} = req.body;
         const {activityHour} = req.body;
     
-        const toBook = await pool.query(`INSERT INTO to_book(sports_centre, activity, activity_day, activity_month, activity_year, activity_hour) VALUES (${sportsCentre}, ${activity}, ${activityDay}, ${activityMonth}, ${activityYear}, ${activityHour} RETURNING *`);
+        const addToBook = await pool.query(`INSERT INTO to_book(sports_centre, activity, activity_day, activity_month, activity_year, activity_hour) VALUES ('${sportsCentre}', '${activity}', ${activityDay}, ${activityMonth}, ${activityYear}, ${activityHour}) RETURNING *`);
 
-        res.json(toBook.rows[0]);
+        res.json(addToBook.rows[0]);
     } catch (error) {
         console.error(error);
     }
 })
+
+app.put('/api/bookings/:id', async (req,res) => {
+    try {
+        const {id} = req.params;
+        const {sportsCentre} = req.body;
+        const {activity} = req.body;
+        const {activityDay} = req.body;
+        const {activityMonth} = req.body;
+        const {activityYear} = req.body;
+        const {activityHour} = req.body;
+
+        const updateToBook = await pool.query(`UPDATE to_book SET sports_centre = '${sportsCentre}', activity = '${activity}', activity_day = ${activityDay}, activity_month = ${activityMonth}, activity_year = ${activityYear}, activity_hour = ${activityHour} WHERE to_book_id = ${id}`);
+
+        res.json("Booking updated");
+    } catch (error) {
+        console.error(error);
+    }
+})
+
+app.delete('/api/bookings/:id', async (req, res) => {
+    try {
+        const {id} = req.params;
+        const deleteToBook = await pool.query(`DELETE FROM to_book WHERE to_book_id = ${id}`);
+    
+        res.json("Succesfully deleted");
+    } catch (error) {
+        console.error(error);
+    }
+})
+
 
 app.listen(port, () => {
     console.log(`server listening on http://localhost:${port}`);
